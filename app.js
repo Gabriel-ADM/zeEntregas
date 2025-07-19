@@ -3,11 +3,11 @@ import Player from './utils/player.js';
 let config = {
   renderer: Phaser.AUTO,
   width: 840,
-  height: 840,
+  height: 500,
   physics: {
     default: 'arcade',
     arcade: {
-      gravity: { y: 300 },
+      gravity: { y: 0 },
       debug: false
     }
   },
@@ -31,7 +31,7 @@ let faseAtual = 1;
 let background;
 
 function preload() {
-  this.load.image('background', 'assets/mapOne Style Game Map.png');
+  this.load.image('city', 'assets/city.png');
   this.load.image('biker-right', 'assets/biker/biker-right.png'); 
   this.load.image('biker-left', 'assets/biker/biker-left.png'); 
   this.load.image('biker-up', 'assets/biker/biker-up.png'); 
@@ -41,7 +41,7 @@ function preload() {
 }
 
 function create() {
-  background = this.add.image(0, 0, 'background').setOrigin(0, 0);
+  background = this.add.image(20, 0, 'city').setOrigin(0, 0);
   background.setDisplaySize(840, 480);
   player = new Player(this, 50, 250, 'biker-right');
 
@@ -54,15 +54,12 @@ function update(time, delta) {
     isGameStarted = true;
     // messageToPlayer.text = 'Aperte a tecla ↑ para mover Zé para cima.';
   }
-  if (!isGameStarted) {
-    player.setVelocityY(0);
-  }
 
   if (isGameStarted && !hasLanded && !hasBumped) {
     player.update(cursors, delta, faseAtual);
   } else {
     player.setVelocity(0, 0);
-    player.setTexture('biker-right');
+    player.setTexture('biker-down');
   }
 
   if (faseAtual === 1 && player.x > 800 && !hasBumped) {
