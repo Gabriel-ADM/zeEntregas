@@ -36,14 +36,15 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
       this.setVelocityX(-speedX);
       this.setTexture('biker-left')
     } else if (cursors.right.isDown) {
-      this.setTexture('biker')
+      this.setTexture('biker-right')
       this.setVelocityX(speedX);
     }
-
     // Movimento vertical
     if (cursors.up.isDown) {
       this.setVelocityY(-speedY);
+      this.setTexture('biker-up')
     } else if (cursors.down.isDown) {
+      this.setTexture('biker-down')
       this.setVelocityY(speedY);
     }
 
@@ -52,6 +53,6 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
   reset(x, y) {
     this.setPosition(x, y);
     this.setVelocity(0, 0);
-    this.setTexture('biker');
+    this.setTexture('biker-down');
   }
 }

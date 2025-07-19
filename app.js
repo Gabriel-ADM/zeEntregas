@@ -1,9 +1,9 @@
-import Player from './utils/Player.js';
+import Player from './utils/player.js';
 
 let config = {
   renderer: Phaser.AUTO,
   width: 840,
-  height: 480,
+  height: 840,
   physics: {
     default: 'arcade',
     arcade: {
@@ -19,7 +19,7 @@ let config = {
 };
 
 let game = new Phaser.Game(config);
-let run1;
+let player;
 let hasLanded = false;
 let cursors;
 let hasBumped = false;
@@ -32,8 +32,10 @@ let background;
 
 function preload() {
   this.load.image('background', 'assets/mapOne Style Game Map.png');
-  this.load.image('biker', 'assets/biker/biker.png'); 
+  this.load.image('biker-right', 'assets/biker/biker-right.png'); 
   this.load.image('biker-left', 'assets/biker/biker-left.png'); 
+  this.load.image('biker-up', 'assets/biker/biker-up.png'); 
+  this.load.image('biker-down', 'assets/biker/biker-down.png'); 
   this.load.image('back2', 'assets/back2.png'); //TESTE para mapTwo (em produção)
   this.load.image('back3', 'assets/back2.png'); //TESTE para mapThree (em produção)
 }
@@ -41,32 +43,32 @@ function preload() {
 function create() {
   background = this.add.image(0, 0, 'background').setOrigin(0, 0);
   background.setDisplaySize(840, 480);
-  run1 = new Player(this, 50, 250, 'biker');
+  player = new Player(this, 50, 250, 'biker-right');
 
   cursors = this.input.keyboard.createCursorKeys();
 }
 
 function update(time, delta) {
-  run1.body.setAllowGravity(false);
+  player.body.setAllowGravity(false);
   if (cursors.space.isDown && !isGameStarted) {
     isGameStarted = true;
     // messageToPlayer.text = 'Aperte a tecla ↑ para mover Zé para cima.';
   }
   if (!isGameStarted) {
-    run1.setVelocityY(0);
+    player.setVelocityY(0);
   }
 
   if (isGameStarted && !hasLanded && !hasBumped) {
-    run1.update(cursors, delta, faseAtual);
+    player.update(cursors, delta, faseAtual);
   } else {
-    run1.setVelocity(0, 0);
-    run1.setTexture('biker');
+    player.setVelocity(0, 0);
+    player.setTexture('biker-right');
   }
 
-  if (faseAtual === 1 && run1.x > 800 && !hasBumped) {
+  if (faseAtual === 1 && player.x > 800 && !hasBumped) {
     faseDois(this);
   }
-  if (faseAtual === 2 && run1.x > 800 && !hasBumped) {
+  if (faseAtual === 2 && player.x > 800 && !hasBumped) {
     faseTres(this);
   }
 
@@ -74,13 +76,13 @@ function update(time, delta) {
 
 function faseDois(scene) {
   faseAtual = 2;
-  background.setTexture('biker');
+  background.setTexture('biker-right');
   background.setDisplaySize(840, 480);
   hasLanded = false;
   hasBumped = false;
   isGameStarted = true;
-  run1.setPosition(0, 250);
-  run1.setTexture('biker');
+  player.setPosition(0, 250);
+  player.setTexture('biker-right');
 
   //messageToPlayer.text = 'Fase 2: Continue entregando!';
   //Phaser.Display.Align.In.BottomCenter(messageToPlayer, background, 150, 300);
@@ -93,9 +95,9 @@ function faseTres(scene) {
   hasLanded = false;
   hasBumped = false;
   isGameStarted = true;
-  run1.setPosition(0, 250);
+  player.setPosition(0, 250);
   //run1.setVelocity(0, 0);
-  run1.setTexture('biker');
+  player.setTexture('biker-right');
 
   //messageToPlayer.text = 'Fase 3: Parabéns! Você chegou até a última fase. Mantenha o foco!';
   //Phaser.Display.Align.In.BottomCenter(messageToPlayer, background, 150, 300);
