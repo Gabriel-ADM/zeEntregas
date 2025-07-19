@@ -13,22 +13,12 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     this.animationTimer = 0;
   }
 
-  update(cursors, delta, faseAtual) {
+  update(cursors) {
     let speedX = 0;
     let speedY = 0;
 
-    // Define velocidade baseada na fase
-    if (faseAtual === 1) {
-      speedX = 100;
-      speedY = 75;
-    } else if (faseAtual === 2) {
-      speedX = 150;
-      speedY = 100;
-    } else {
-      speedX = 200;
-      speedY = 150;
-    }
-
+    speedX = 100;
+    speedY = 75;
     this.setVelocity(0, 0);
 
     // Movimento vertical
@@ -47,7 +37,6 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
       this.setTexture('biker-right')
       this.setVelocityX(speedX);
     }
-
   }
 
   reset(x, y) {
