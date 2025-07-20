@@ -1,5 +1,5 @@
 import Car from './utils/Car.js';
-import Player from './utils/player.js';
+import Player from './utils/Player.js';
 
 const screenWidth = 1150;
 const screenHeight = 650;
