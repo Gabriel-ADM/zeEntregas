@@ -28,6 +28,8 @@ let player;
 let cars = [];
 let cursors;
 let isGameStarted = false;
+let deliveryAreas = [];
+let bagGroups = [];
 
 function preload() {
   this.load.image('city', 'assets/city.png');
@@ -96,7 +98,6 @@ function create() {
     { x: 765, y: 380, width: 70, height: 50 },
   ]
 
-
   const PaperBagsCount1 = Math.floor(Math.random() * (6 - 4 + 1)) + 4;
   const PaperBagsCount2 = 10 - PaperBagsCount1;
   const PaperBagsCounts = [PaperBagsCount1, PaperBagsCount2];
@@ -104,6 +105,7 @@ function create() {
   // The forEach loop gives us the point AND its index (0 for the first, 1 for the second)
   deliveryPoints.forEach((deliveryPoint, index) => {
     const { x, y, width, height } = deliveryPoint;
+    deliveryAreas.push(new Phaser.Geom.Rectangle(x, y, width, height));
 
     // Get the number of bags for THIS specific point using the index
     const countForThisPoint = PaperBagsCounts[index];
@@ -134,7 +136,7 @@ function create() {
         delay: Phaser.Math.Between(0, 500)
       });
     }
-
+    bagGroups.push(paperBags);
 
     // Desenha a área visível (posição: canto superior esquerdo)
     const graphics = this.add.graphics();
@@ -156,6 +158,12 @@ function create() {
     });
   });
 
+  this.add.text(screenWidth / 2, 15, 'Vá Próximo a um Ponto de Coleta e aperte ESPAÇO para coletar a entrega', {
+    font: '20px Arial',
+    fill: '#ffffff',
+    backgroundColor: 'rgba(0,0,0,1)',
+    padding: { x: 10, y: 5 }
+  }).setOrigin(0.5);
 
   cursors = this.input.keyboard.createCursorKeys();
 }
@@ -166,9 +174,7 @@ cursors = this.input.keyboard.createCursorKeys();
 
 
 function update(delta) {
-  if (cursors.space.isDown && !isGameStarted) {
-    isGameStarted = true;
-  }
+  isGameStarted = true;
 
   if (isGameStarted) {
     player.update(cursors, delta);
@@ -177,4 +183,42 @@ function update(delta) {
   cars.forEach(car => {
     car.update();
   });
+
+  if (Phaser.Input.Keyboard.JustDown(cursors.space)) {
+    // Check each delivery area
+    deliveryAreas.forEach((area, index) => {
+      // Find the closest point on the rectangle's edge to the player
+      const closestX = Math.max(area.left, Math.min(player.x, area.right));
+      const closestY = Math.max(area.top, Math.min(player.y, area.bottom));
+
+      // Calculate the distance from the player to that point
+      const distanceToArea = Phaser.Math.Distance.Between(player.x, player.y, closestX, closestY);
+      console.log(distanceToArea)
+      // 1. PROXIMITY CHECK: Is the player within 50 pixels of the area?
+      if (distanceToArea < 25 ) {
+        const targetGroup = bagGroups[index];
+        const bagsInArea = targetGroup.getChildren();
+
+        // If there are no bags left, do nothing
+        if (bagsInArea.length === 0) return;
+
+        let closestBag = null;
+        let minDistanceToBag = Infinity;
+
+        // 2. FIND CLOSEST BAG: Find the closest bag *inside this specific group*
+        for (const bag of bagsInArea) {
+          const distance = Phaser.Math.Distance.Between(player.x, player.y, bag.x, bag.y);
+          if (distance < minDistanceToBag) {
+            minDistanceToBag = distance;
+            closestBag = bag;
+          }
+        }
+
+        // 3. COLLECT: If we found a bag, destroy it.
+        if (closestBag) {
+          closestBag.destroy();
+        }
+      }
+    });
+  }
 }
