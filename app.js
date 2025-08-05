@@ -222,6 +222,43 @@ function update(delta) {
   npcs.forEach(npc => npc.update());
 
   if (Phaser.Input.Keyboard.JustDown(cursors.space)) {
+    if (collectedBag) {
+      let deliveredToNpc = false;
+      for (const npc of npcs) {
+        const distanceToNpc = Phaser.Math.Distance.Between(player.x, player.y, npc.x, npc.y);
+
+        // Check if player is close enough to this NPC
+        if (distanceToNpc < 70) {
+          console.log('Entregue com sucesso!');
+          collectedBag = false;
+          deliveredToNpc = true;
+
+          // Optional: Create a visual effect for the delivery
+          const deliveredBag = this.add.image(npc.x, npc.y - 15, 'paper-bag')
+            .setScale(0.05)
+            .setAlpha(1)
+            .setDepth(5);
+
+          this.tweens.add({
+            targets: deliveredBag,
+            alpha: 0,
+            y: npc.y - 40, // Move up as it fades
+            duration: 800,
+            onComplete: () => {
+              deliveredBag.destroy(); // Clean up the image after the tween
+            }
+          });
+
+          // Break the loop since we've delivered the bag
+          break; 
+        }
+      }
+      // If we delivered to an NPC, don't also try to collect from a delivery zone
+      if (deliveredToNpc) {
+        return; 
+      }
+    }
+
     // Check each delivery area
     deliveryAreas.forEach((area, index) => {
       // Find the closest point on the rectangle's edge to the player
