@@ -97,7 +97,7 @@ function create() {
   ]
 
 
-  const PaperBagsCount1 = Math.floor(Math.random() * (6 - 4 + 1)) + 3;
+  const PaperBagsCount1 = Math.floor(Math.random() * (6 - 4 + 1)) + 4;
   const PaperBagsCount2 = 10 - PaperBagsCount1;
   const PaperBagsCounts = [PaperBagsCount1, PaperBagsCount2];
 
