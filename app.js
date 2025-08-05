@@ -123,7 +123,6 @@ function create() {
   ]
 
   npcs.forEach((npc, index) => {
-    // Get the block that this specific NPC should patrol in
     const patrolBlockData = patrolAreas[index];
 
     // Create a Phaser Rectangle geometry object from the block's data
@@ -135,8 +134,6 @@ function create() {
     );
     graphics.fillRectShape(patrolArea);
 
-    // Tell the NPC what its boundaries are.
-    // The NPC will handle the rest internally in its preUpdate function.
     npc.setPatrolArea(patrolArea);
   });
 
@@ -164,7 +161,6 @@ function create() {
       const bagX = Phaser.Math.Between(x, x + width);
       const bagY = Phaser.Math.Between(y, y + height);
 
-      // ... your code to create the bag and tween ...
       const bag = this.add.image(bagX, bagY, 'paper-bag')
         .setScale(0.05)
         .setAlpha(0.8)
@@ -236,9 +232,8 @@ function update(delta) {
       const distanceToArea = Phaser.Math.Distance.Between(player.x, player.y, closestX, closestY);
       if (distanceToArea < 25 && collectedBag == true) {
         const warningMessage = this.add.text(player.x, player.y - 50, 'Antes de Realizar Outra Entrega \nFinalize a que Está em Andamento', {
-          // Make the font smaller
           font: '14px Arial',
-          fill: '#000000ff', // White text is more readable on a red background
+          fill: '#000000ff',
           backgroundColor: 'rgba(255, 23, 23, 1)',
           padding: { x: 8, y: 4 }
         }).setOrigin(0.5).setDepth(100);; // Center the text on the player's x-axis
@@ -248,7 +243,7 @@ function update(delta) {
           warningMessage.destroy();
         });
       }
-      // 1. PROXIMITY CHECK: Is the player within 50 pixels of the area?
+      // 1. PROXIMITY CHECK: Is the player within 50 pixels of the area
       if (distanceToArea < 25 && collectedBag != true) {
         const targetGroup = bagGroups[index];
         const bagsInArea = targetGroup.getChildren();
@@ -259,7 +254,7 @@ function update(delta) {
         let closestBag = null;
         let minDistanceToBag = Infinity;
 
-        // 2. FIND CLOSEST BAG: Find the closest bag *inside this specific group*
+        // 2. FIND CLOSEST BAG: Find the closest bag
         for (const bag of bagsInArea) {
           const distance = Phaser.Math.Distance.Between(player.x, player.y, bag.x, bag.y);
           if (distance < minDistanceToBag) {
