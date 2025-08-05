@@ -28,8 +28,10 @@ let player;
 let cars = [];
 let cursors;
 let isGameStarted = false;
+// Game rules
 let deliveryAreas = [];
 let bagGroups = [];
+let collectedBag = false;
 
 function preload() {
   this.load.image('city', 'assets/city.png');
@@ -193,9 +195,22 @@ function update(delta) {
 
       // Calculate the distance from the player to that point
       const distanceToArea = Phaser.Math.Distance.Between(player.x, player.y, closestX, closestY);
-      console.log(distanceToArea)
+      if (distanceToArea < 25 && collectedBag == true) {
+        const warningMessage = this.add.text(player.x, player.y - 50, 'Antes de Realizar Outra Entrega \nFinalize a que Está em Andamento', {
+          // Make the font smaller
+          font: '14px Arial',
+          fill: '#000000ff', // White text is more readable on a red background
+          backgroundColor: 'rgba(255, 23, 23, 1)',
+          padding: { x: 8, y: 4 }
+        }).setOrigin(0.5).setDepth(100);; // Center the text on the player's x-axis
+
+        // Set a timer to destroy the message after 2 seconds (2000 milliseconds)
+        this.time.delayedCall(3000, () => {
+          warningMessage.destroy();
+        });
+      }
       // 1. PROXIMITY CHECK: Is the player within 50 pixels of the area?
-      if (distanceToArea < 25 ) {
+      if (distanceToArea < 25 && collectedBag != true) {
         const targetGroup = bagGroups[index];
         const bagsInArea = targetGroup.getChildren();
 
@@ -217,6 +232,7 @@ function update(delta) {
         // 3. COLLECT: If we found a bag, destroy it.
         if (closestBag) {
           closestBag.destroy();
+          collectedBag = true;
         }
       }
     });
