@@ -1,4 +1,5 @@
 import Car from './utils/Car.js';
+import NPC from './utils/NPC.js';
 import Player from './utils/Player.js';
 
 const screenWidth = 1150;
@@ -26,6 +27,7 @@ let game = new Phaser.Game(config);
 let background;
 let player;
 let cars = [];
+let npcs = [];
 let cursors;
 let isGameStarted = false;
 // Game rules
@@ -47,6 +49,13 @@ function preload() {
   this.load.image('car-down', 'assets/car/car-down.png');
 
   this.load.image('paper-bag', 'assets/paper-bag.png');
+
+  for (let index = 1; index <= 3; index++) {
+    this.load.image(`npc-up-${index}`, `assets/npc/npc-up-${index}.png`);
+    this.load.image(`npc-down-${index}`, `assets/npc/npc-down-${index}.png`);
+    this.load.image(`npc-left-${index}`, `assets/npc/npc-left-${index}.png`);
+    this.load.image(`npc-right-${index}`, `assets/npc/npc-right-${index}.png`);
+  }
 }
 
 function create() {
@@ -60,6 +69,13 @@ function create() {
     new Car(this, 750, 400, 'y', 70),
     new Car(this, 460, 310, 'y', 50),
     new Car(this, 1100, 100, 'y', 110),
+  ]
+  npcs = [
+    new NPC(this, 90, 200, 'y', 70, 1),
+    new NPC(this, 650, 430, 'x', 40, 2),
+    new NPC(this, 260, 370, 'x', 20, 3),
+    new NPC(this, 620, 80, 'x', 60, 2),
+    new NPC(this, 1140, 340, 'y', 50, 3),
   ]
 
   const mapBlocks = [
@@ -78,7 +94,7 @@ function create() {
     { x: 1080, y: 565, width: 250, height: 160 },
     { x: 1020, y: 260, width: 120, height: 370 },
     { x: 1020, y: 20, width: 120, height: 40 },
-    { x: 1140, y: 260, width: 50, height: 500 },
+    { x: 1140, y: 260, width: 50, height: 470 },
     { x: 1140, y: 10, width: 150, height: 20 },
   ];
 
@@ -93,6 +109,35 @@ function create() {
         car.reverseDirection();
       });
     });
+  });
+
+  const graphics = this.add.graphics();
+  graphics.fillStyle(0x00ff00, 0.3);
+
+  const patrolAreas = [
+    { x: 80, y: 70, width: 50, height: 230 },
+    { x: 500, y: 420, width: 200, height: 20 },
+    { x: 230, y: 350, width: 200, height: 40 },
+    { x: 490, y: 80, width: 420, height: 30 },
+    { x: 1120, y: 20, width: 30, height: 470 },
+  ]
+
+  npcs.forEach((npc, index) => {
+    // Get the block that this specific NPC should patrol in
+    const patrolBlockData = patrolAreas[index];
+
+    // Create a Phaser Rectangle geometry object from the block's data
+    const patrolArea = new Phaser.Geom.Rectangle(
+      patrolBlockData.x,
+      patrolBlockData.y,
+      patrolBlockData.width,
+      patrolBlockData.height,
+    );
+    graphics.fillRectShape(patrolArea);
+
+    // Tell the NPC what its boundaries are.
+    // The NPC will handle the rest internally in its preUpdate function.
+    npc.setPatrolArea(patrolArea);
   });
 
   const deliveryPoints = [
@@ -160,7 +205,7 @@ function create() {
     });
   });
 
-  this.add.text(screenWidth / 2, 15, 'Vá Próximo a um Ponto de Coleta e aperte ESPAÇO para coletar a entrega', {
+  this.add.text(screenWidth / 2, 15, 'Aperte ESPAÇO para coletar/entregar', {
     font: '20px Arial',
     fill: '#ffffff',
     backgroundColor: 'rgba(0,0,0,1)',
@@ -170,11 +215,6 @@ function create() {
   cursors = this.input.keyboard.createCursorKeys();
 }
 
-
-
-cursors = this.input.keyboard.createCursorKeys();
-
-
 function update(delta) {
   isGameStarted = true;
 
@@ -182,9 +222,8 @@ function update(delta) {
     player.update(cursors, delta);
   }
 
-  cars.forEach(car => {
-    car.update();
-  });
+  cars.forEach(car => car.update());
+  npcs.forEach(npc => npc.update());
 
   if (Phaser.Input.Keyboard.JustDown(cursors.space)) {
     // Check each delivery area
