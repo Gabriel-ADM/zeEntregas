@@ -99,25 +99,27 @@ function create() {
 
   const PaperBagsCount1 = Math.floor(Math.random() * (6 - 4 + 1)) + 3;
   const PaperBagsCount2 = 10 - PaperBagsCount1;
-  const PaperBagsCounts = [];
-  PaperBagsCounts.push(PaperBagsCount1, PaperBagsCount2);
+  const PaperBagsCounts = [PaperBagsCount1, PaperBagsCount2];
 
-
-  deliveryPoints.forEach(deliveryPoint => {
+  // The forEach loop gives us the point AND its index (0 for the first, 1 for the second)
+  deliveryPoints.forEach((deliveryPoint, index) => {
     const { x, y, width, height } = deliveryPoint;
 
-    const paperBagArea = (deliveryPoint.width * deliveryPoint.height) / 2;
-    // Group to hold all bags
+    // Get the number of bags for THIS specific point using the index
+    const countForThisPoint = PaperBagsCounts[index];
+
     const paperBags = this.add.group();
 
-    for (let i = 0; i < PaperBagsCounts[1]; i++) {
+    // Now, loop only the required number of times for this point
+    for (let i = 0; i < countForThisPoint; i++) {
       const bagX = Phaser.Math.Between(x, x + width);
       const bagY = Phaser.Math.Between(y, y + height);
 
+      // ... your code to create the bag and tween ...
       const bag = this.add.image(bagX, bagY, 'paper-bag')
         .setScale(0.05)
         .setAlpha(0.8)
-        .setDepth(5); // anything higher than background or hitbox graphics
+        .setDepth(5);
 
       paperBags.add(bag);
 
