@@ -26,6 +26,7 @@ let config = {
 let game = new Phaser.Game(config);
 let background;
 let player;
+let phase = 1;
 let cars = [];
 let npcs = [];
 let cursors;
@@ -33,10 +34,12 @@ let isGameStarted = false;
 // Game rules
 let deliveryAreas = [];
 let bagGroups = [];
+let bagCount = 1;
 let collectedBag = false;
 
 function preload() {
   this.load.image('city', 'assets/city.png');
+  this.load.image('field', 'assets/field.png');
 
   this.load.image('biker-right', 'assets/biker/biker-right.png');
   this.load.image('biker-left', 'assets/biker/biker-left.png');
@@ -59,44 +62,115 @@ function preload() {
 }
 
 function create() {
-  background = this.add.image(0, 0, 'city').setOrigin(0, 0);
+  let patrolAreas, mapBlocks, deliveryPoints, PaperBagsCounts;
+  if (phase === 1) {
+    background = this.add.image(0, 0, 'city').setOrigin(0, 0);
+    player = new Player(this, 50, 250, 'biker-down');
+    bagCount = 10;
+
+    const PaperBagsCount1 = Math.floor(Math.random() * (6 - 4 + 1)) + 4;
+    const PaperBagsCount2 = bagCount - PaperBagsCount1;
+    PaperBagsCounts = [PaperBagsCount1, PaperBagsCount2];
+
+    cars = [
+      new Car(this, 100, 410, 'x', 70),
+      new Car(this, 300, 60, 'x', 45),
+      new Car(this, 750, 400, 'y', 70),
+      new Car(this, 460, 310, 'y', 50),
+      new Car(this, 1100, 100, 'y', 110),
+    ]
+    npcs = [
+      new NPC(this, 90, 200, 'y', 70, 1),
+      new NPC(this, 650, 430, 'x', 40, 2),
+      new NPC(this, 260, 370, 'x', 20, 3),
+      new NPC(this, 620, 80, 'x', 60, 2),
+      new NPC(this, 1140, 340, 'y', 50, 3),
+    ]
+
+    patrolAreas = [
+      { x: 80, y: 70, width: 50, height: 230 },
+      { x: 500, y: 420, width: 200, height: 20 },
+      { x: 90, y: 350, width: 340, height: 40 },
+      { x: 490, y: 80, width: 420, height: 30 },
+      { x: 1120, y: 20, width: 30, height: 470 },
+    ]
+
+    mapBlocks = [
+      { x: 0, y: 0, width: 1840, height: 80 },
+      { x: 0, y: 400, width: 70, height: 650 },
+      { x: 150, y: 237, width: 150, height: 320 },
+      { x: 270, y: 340, width: 350, height: 110 },
+      { x: 45, y: 650, width: 800, height: 430 },
+      { x: 350, y: 165, width: 180, height: 170 },
+      { x: 700, y: 105, width: 445, height: 55 },
+      { x: 600, y: 230, width: 250, height: 110 },
+      { x: 600, y: 385, width: 250, height: 120 },
+      { x: 840, y: 200, width: 150, height: 170 },
+      { x: 840, y: 385, width: 150, height: 120 },
+      { x: 600, y: 565, width: 650, height: 160 },
+      { x: 1080, y: 565, width: 250, height: 160 },
+      { x: 1020, y: 260, width: 120, height: 370 },
+      { x: 1020, y: 20, width: 120, height: 40 },
+      { x: 1140, y: 260, width: 50, height: 470 },
+      { x: 1140, y: 10, width: 150, height: 20 },
+    ];
+    deliveryPoints = [
+      { x: 300, y: 180, width: 80, height: 60 },
+      { x: 765, y: 380, width: 70, height: 50 },
+    ];
+  }
+  if (phase === 2) {
+    background = this.add.image(0, 0, 'field').setOrigin(0, 0);
+    player = new Player(this, 50, 200, 'biker-right');
+    
+    const PaperBagsCount1 = Math.floor(Math.random() * (6 - 4 + 1)) + 4;
+    const PaperBagsCount2 = 8 - PaperBagsCount1;
+    PaperBagsCounts = [PaperBagsCount1, PaperBagsCount2, PaperBagsCount2, PaperBagsCount1 ];
+    
+    bagCount = PaperBagsCounts.reduce((accumulator, current) => accumulator + current, 0);
+
+    cars = [
+      new Car(this, 480, 410, 'y', 110),
+      new Car(this, 600, 70, 'x', 50),
+      new Car(this, 800, 530, 'x', 50),
+    ]
+    npcs = [
+      new NPC(this, 220, 140, 'x', 70, 1),
+      new NPC(this, 540, 400, 'y', 40, 3),
+      new NPC(this, 650, 500, 'x', 40, 2),
+      new NPC(this, 700, 200, 'x', 20, 3),
+    ]
+
+    patrolAreas = [
+      { x: 205, y: 100, width: 250, height: 60 },
+      { x: 530, y: 340, width: 370, height: 180 },
+      { x: 530, y: 340, width: 370, height: 180 },
+      { x: 530, y: 180, width: 400, height: 30 },
+    ]
+
+    mapBlocks = [
+      { x: 0, y: 0, width: 2300, height: 110 },
+      { x: 0, y: 40, width: 870, height: 230 },
+      { x: 0, y: 290, width: 910, height: 130 },
+      { x: 375, y: 340, width: 160, height: 110 },
+      { x: 60, y: 650, width: 800, height: 440 },
+      { x: 0, y: 420, width: 460, height: 50 },
+      { x: 690, y: 600, width: 500, height: 95 },
+      { x: 847, y: 390, width: 175, height: 160 },
+      { x: 735, y: 430, width: 400, height: 170 },
+      { x: 625, y: 220, width: 185, height: 160 },
+      { x: 735, y: 175, width: 400, height: 160 },
+      { x: 1100, y: 10, width: 190, height: 1500 },
+    ];
+    deliveryPoints = [
+      { x: 120, y: 110, width: 50, height: 40 },
+      { x: 300, y: 340, width: 60, height: 50 },
+      { x: 620, y: 250, width: 60, height: 50 },
+      { x: 1010, y: 480, width: 60, height: 50 },
+    ];
+  }
   background.setScale(0.6)
-  player = new Player(this, 50, 250, 'biker-down');
 
-  cars = [
-    new Car(this, 100, 410, 'x', 70),
-    new Car(this, 300, 60, 'x', 45),
-    new Car(this, 750, 400, 'y', 70),
-    new Car(this, 460, 310, 'y', 50),
-    new Car(this, 1100, 100, 'y', 110),
-  ]
-  npcs = [
-    new NPC(this, 90, 200, 'y', 70, 1),
-    new NPC(this, 650, 430, 'x', 40, 2),
-    new NPC(this, 260, 370, 'x', 20, 3),
-    new NPC(this, 620, 80, 'x', 60, 2),
-    new NPC(this, 1140, 340, 'y', 50, 3),
-  ]
-
-  const mapBlocks = [
-    { x: 0, y: 0, width: 1840, height: 80 },
-    { x: 0, y: 400, width: 70, height: 650 },
-    { x: 150, y: 237, width: 150, height: 320 },
-    { x: 270, y: 340, width: 350, height: 110 },
-    { x: 45, y: 650, width: 800, height: 430 },
-    { x: 350, y: 165, width: 180, height: 170 },
-    { x: 700, y: 105, width: 445, height: 55 },
-    { x: 600, y: 230, width: 250, height: 110 },
-    { x: 600, y: 385, width: 250, height: 120 },
-    { x: 840, y: 200, width: 150, height: 170 },
-    { x: 840, y: 385, width: 150, height: 120 },
-    { x: 600, y: 565, width: 650, height: 160 },
-    { x: 1080, y: 565, width: 250, height: 160 },
-    { x: 1020, y: 260, width: 120, height: 370 },
-    { x: 1020, y: 20, width: 120, height: 40 },
-    { x: 1140, y: 260, width: 50, height: 470 },
-    { x: 1140, y: 10, width: 150, height: 20 },
-  ];
 
   mapBlocks.forEach(mapBlock => {
     const hitbox = this.add.rectangle(mapBlock.x, mapBlock.y, mapBlock.width, mapBlock.height);
@@ -114,14 +188,6 @@ function create() {
   const graphics = this.add.graphics();
   graphics.fillStyle(0x00ff00, 0.3);
 
-  const patrolAreas = [
-    { x: 80, y: 70, width: 50, height: 230 },
-    { x: 500, y: 420, width: 200, height: 20 },
-    { x: 230, y: 350, width: 200, height: 40 },
-    { x: 490, y: 80, width: 420, height: 30 },
-    { x: 1120, y: 20, width: 30, height: 470 },
-  ]
-
   npcs.forEach((npc, index) => {
     const patrolBlockData = patrolAreas[index];
 
@@ -132,19 +198,11 @@ function create() {
       patrolBlockData.width,
       patrolBlockData.height,
     );
-    graphics.fillRectShape(patrolArea);
+    // debug patrol
+    // graphics.fillRectShape(patrolArea);
 
     npc.setPatrolArea(patrolArea);
   });
-
-  const deliveryPoints = [
-    { x: 300, y: 180, width: 80, height: 60 },
-    { x: 765, y: 380, width: 70, height: 50 },
-  ]
-
-  const PaperBagsCount1 = Math.floor(Math.random() * (6 - 4 + 1)) + 4;
-  const PaperBagsCount2 = 10 - PaperBagsCount1;
-  const PaperBagsCounts = [PaperBagsCount1, PaperBagsCount2];
 
   // The forEach loop gives us the point AND its index (0 for the first, 1 for the second)
   deliveryPoints.forEach((deliveryPoint, index) => {
@@ -250,12 +308,15 @@ function update(delta) {
           });
 
           // Break the loop since we've delivered the bag
-          break; 
+          break;
         }
       }
       // If we delivered to an NPC, don't also try to collect from a delivery zone
       if (deliveredToNpc) {
-        return; 
+        bagCount--;
+        console.log(bagCount)
+
+        return;
       }
     }
 
