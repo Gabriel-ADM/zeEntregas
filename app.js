@@ -122,11 +122,11 @@ function create() {
   if (phase === 2) {
     background = this.add.image(0, 0, 'field').setOrigin(0, 0);
     player = new Player(this, 50, 200, 'biker-right');
-    
+
     const PaperBagsCount1 = Math.floor(Math.random() * (6 - 4 + 1)) + 4;
     const PaperBagsCount2 = 8 - PaperBagsCount1;
-    PaperBagsCounts = [PaperBagsCount1, PaperBagsCount2, PaperBagsCount2, PaperBagsCount1 ];
-    
+    PaperBagsCounts = [PaperBagsCount1, PaperBagsCount2, PaperBagsCount2, PaperBagsCount1];
+
     bagCount = PaperBagsCounts.reduce((accumulator, current) => accumulator + current, 0);
 
     cars = [
@@ -315,7 +315,10 @@ function update(delta) {
       if (deliveredToNpc) {
         bagCount--;
         console.log(bagCount)
-
+        if (bagCount == 0) {
+          phase = phase === 1 ? 2 : 1;
+          this.scene.restart();
+        }
         return;
       }
     }
