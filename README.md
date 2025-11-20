@@ -40,6 +40,7 @@ Estrutura do projeto
 Dicas para desenvolvimento
 -------------------------
 - Para desenvolvimento rápido, use o comando `python3 -m http.server 8080` como acima.
+- Para alteração de assets, objetos e física do jogo altere a flag `debug: false` para `true` na variavel `config` de `app.js` possibilitando a visualizacao de caixas de colisao
 - Se o jogo não carregar, abra o console do navegador (F12) e verifique erros de `404` (recursos não encontrados) ou erros de JavaScript.
 - Se `Phaser` for carregado via CDN e você estiver sem internet, troque para uma cópia local de `phaser.js` ou adicione a biblioteca localmente em `libs/` e atualize `index.html`.
 
