@@ -13,7 +13,7 @@ let config = {
     default: 'arcade',
     arcade: {
       gravity: { y: 0 },
-      debug: true
+      debug: false
     }
   },
   scene: {
@@ -36,6 +36,10 @@ let deliveryAreas = [];
 let bagGroups = [];
 let bagCount = 1;
 let collectedBag = false;
+
+let scores = [];
+let startTime = null;
+let playerName;
 
 function preload() {
   this.load.image('city', 'assets/city.png');
@@ -66,6 +70,8 @@ function create() {
   if (phase === 1) {
     background = this.add.image(0, 0, 'city').setOrigin(0, 0);
     player = new Player(this, 50, 250, 'biker-down');
+    playerName = prompt("Digite seu nome:") || "Anonimo";
+    startTime = this.time.now;
     bagCount = 10;
 
     const PaperBagsCount1 = Math.floor(Math.random() * (6 - 4 + 1)) + 4;
@@ -170,6 +176,11 @@ function create() {
     ];
   }
   background.setScale(0.6)
+
+  this.add.text(10, 10, `Player: ${playerName}`, {
+    font: '18px Arial',
+    fill: '#010101ff'
+  }).setDepth(10);
 
 
   mapBlocks.forEach(mapBlock => {
@@ -314,8 +325,34 @@ function update(delta) {
       // If we delivered to an NPC, don't also try to collect from a delivery zone
       if (deliveredToNpc) {
         bagCount--;
-        console.log(bagCount)
+
+        if (startTime !== null) {
+          let deliveryTime = (this.time.now - startTime) / 1000; // segundos
+          scores.push(deliveryTime);
+          console.log(`Tempo da entrega: ${deliveryTime.toFixed(2)}s`);
+        }
+
         if (bagCount == 0) {
+          if (phase == 2) {
+            fetch('https://sismultimidia.app.n8n.cloud/webhook-test/9c0c1a00-3a27-45e2-8304-b7cb50b0421c', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                playerName: playerName,
+                scores: scores
+              })
+            })
+              .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                console.log('Scores sent successfully!');
+              })
+              .catch(error => {
+                console.error('Error sending scores:', error);
+              });
+          }
+
           phase = phase === 1 ? 2 : 1;
           this.scene.restart();
         }
